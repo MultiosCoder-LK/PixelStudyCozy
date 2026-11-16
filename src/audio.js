@@ -1,8 +1,8 @@
 // Ambient sound engine.
 //
-// Every sound here is generated live with the Web Audio API, so the
-// project works with zero audio files. To use real recordings instead
-// (e.g. CC0 rain from freesound.org), see the README.
+// Rain plays a real recording from public/sounds/. Every other sound is
+// generated live with the Web Audio API. To swap in more recordings
+// (e.g. CC0 loops from freesound.org), see the README.
 
 import { DEFAULT_VOLUMES } from './config.js';
 
@@ -21,8 +21,8 @@ const WEATHER_MIX = {
   clear: { rain: 0, wind: 0.05 },
   cloudy: { rain: 0, wind: 0.2 },
   fog: { rain: 0, wind: 0.15 },
-  rain: { rain: 0.65, wind: 0.12 },
-  storm: { rain: 0.9, wind: 0.45 },
+  rain: { rain: 0.65, wind: 0.04 },
+  storm: { rain: 0.9, wind: 0.25 },
   snow: { rain: 0, wind: 0.35 },
 };
 
@@ -136,13 +136,31 @@ function lfo(rate, depth, target) {
 
 // ─── Channels ────────────────────────────────────────────────────────
 
-function buildRain() {
-  // Hiss of many small drops…
-  const hissFilter = filter('lowpass', 4500);
-  loop(noiseBuffer('pink')).connect(filter('highpass', 400)).connect(hissFilter).connect(gain(0.7)).connect(channels.rain);
-  lfo(0.08, 900, hissFilter.frequency); // slowly varying intensity
-  // …plus the low "body" of rain on a roof.
-  loop(noiseBuffer('brown')).connect(filter('lowpass', 700)).connect(gain(0.55)).connect(channels.rain);
+// A real recording: "Light Rain Distant Thunder July 5th 2016", recorded in
+// deep woods in the US Midwest (CC0, Wikimedia Commons). Trimmed and normalized.
+async function buildRain() {
+  const data = await fetch('sounds/rain.mp3').then((r) => r.arrayBuffer());
+  loop(seamless(await ctx.decodeAudioData(data))).connect(channels.rain);
+}
+
+// MP3s carry a few ms of silence at each end, which clicks when looped.
+// Trim the edges and crossfade the tail into the head for a smooth loop.
+function seamless(buffer, fadeSeconds = 1.5) {
+  const rate = buffer.sampleRate;
+  const trim = Math.floor(rate * 0.1);
+  const fade = Math.floor(rate * fadeSeconds);
+  const len = buffer.length - trim * 2 - fade;
+  const out = ctx.createBuffer(buffer.numberOfChannels, len, rate);
+  for (let c = 0; c < buffer.numberOfChannels; c++) {
+    const src = buffer.getChannelData(c).subarray(trim);
+    const dst = out.getChannelData(c);
+    dst.set(src.subarray(0, len));
+    for (let i = 0; i < fade; i++) {
+      const t = i / fade;
+      dst[i] = src[i] * Math.sqrt(t) + src[len + i] * Math.sqrt(1 - t);
+    }
+  }
+  return out;
 }
 
 function buildWind() {
