@@ -14,7 +14,7 @@ delete volumes.master;
 let masterVolume = DEFAULT_VOLUMES.master;
 
 // Per-channel loudness balance so 100% on each slider feels similar.
-const MIX = { rain: 0.9, wind: 0.7, fire: 0.9, lofi: 0.45 };
+const MIX = { rain: 0.9, wind: 0.7, fire: 0.9, lofi: 0.45, beats: 0.55 };
 
 // Which rain/wind levels each weather kind should have.
 const WEATHER_MIX = {
@@ -205,10 +205,14 @@ const CHORDS = [
 const PENTATONIC = [72, 74, 76, 79, 81];
 const midiToHz = (m) => 440 * Math.pow(2, (m - 69) / 12);
 
+// One chord per bar. 3.6 s per bar = 4 beats of 0.9 s (about 67 BPM).
+const BAR = 3.6;
+const BEAT = BAR / 4;
+
 function buildLofi() {
   const tone = filter('lowpass', 1300);
   tone.connect(channels.lofi);
-  const chordLength = 3.6;
+  const drums = buildBeats();
   let nextTime = ctx.currentTime + 0.2;
   let index = 0;
 
@@ -226,22 +230,105 @@ function buildLofi() {
     osc.stop(startAt + length + 2);
   };
 
-  // Schedule a little ahead of time so playback never stutters.
+  // Schedule a bar at a time, a little ahead, so playback never stutters.
+  // Keys and beats share this clock so they always stay in time together.
   setInterval(() => {
     while (nextTime < ctx.currentTime + 1) {
       if (volumes.lofi > 0.01) {
         const chord = CHORDS[index % CHORDS.length];
-        chord.forEach((m) => note(midiToHz(m), nextTime, chordLength, 'triangle', 0.09));
-        note(midiToHz(chord[0] - 12), nextTime, chordLength, 'sine', 0.18);
+        chord.forEach((m) => note(midiToHz(m), nextTime, BAR, 'triangle', 0.09));
+        note(midiToHz(chord[0] - 12), nextTime, BAR, 'sine', 0.18);
         if (Math.random() < 0.7) {
           const m = PENTATONIC[Math.floor(Math.random() * PENTATONIC.length)];
           note(midiToHz(m), nextTime + 0.9 + Math.random(), 1.4, 'sine', 0.06);
         }
       }
+      if (volumes.beats > 0.01) drums.bar(nextTime, index);
       index++;
-      nextTime += chordLength;
+      nextTime += BAR;
     }
   }, 250);
+}
+
+// A lazy, swung boom-bap: kick, snare on 2 and 4, soft hi-hats, all
+// rolled off on top so it sits under the keys like an old cassette.
+function buildBeats() {
+  const out = filter('lowpass', 4200);
+  out.connect(channels.beats);
+  const noise = noiseBuffer('white', 0.5);
+  const swing = BEAT * 0.12; // push every off-beat 8th late
+  const nudge = () => (Math.random() - 0.5) * 0.012; // human timing
+
+  const kick = (t, level = 1) => {
+    const osc = ctx.createOscillator();
+    osc.frequency.setValueAtTime(120, t);
+    osc.frequency.exponentialRampToValueAtTime(45, t + 0.12);
+    const env = gain(0);
+    env.gain.setValueAtTime(0.0001, t);
+    env.gain.exponentialRampToValueAtTime(0.9 * level, t + 0.005);
+    env.gain.exponentialRampToValueAtTime(0.0001, t + 0.45);
+    osc.connect(env).connect(out);
+    osc.start(t);
+    osc.stop(t + 0.5);
+  };
+
+  const snare = (t, level = 1) => {
+    const src = ctx.createBufferSource();
+    src.buffer = noise;
+    const env = gain(0);
+    env.gain.setValueAtTime(0.0001, t);
+    env.gain.exponentialRampToValueAtTime(0.35 * level, t + 0.004);
+    env.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+    src.connect(filter('bandpass', 1800, 0.9)).connect(env).connect(out);
+    src.start(t);
+    src.stop(t + 0.3);
+    // A little body under the noise.
+    const body = ctx.createOscillator();
+    body.frequency.setValueAtTime(190, t);
+    body.frequency.exponentialRampToValueAtTime(140, t + 0.08);
+    const bodyEnv = gain(0);
+    bodyEnv.gain.setValueAtTime(0.0001, t);
+    bodyEnv.gain.exponentialRampToValueAtTime(0.25 * level, t + 0.004);
+    bodyEnv.gain.exponentialRampToValueAtTime(0.0001, t + 0.1);
+    body.connect(bodyEnv).connect(out);
+    body.start(t);
+    body.stop(t + 0.15);
+  };
+
+  const hat = (t, level) => {
+    const src = ctx.createBufferSource();
+    src.buffer = noise;
+    const env = gain(0);
+    env.gain.setValueAtTime(0.0001, t);
+    env.gain.exponentialRampToValueAtTime(level, t + 0.002);
+    env.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+    src.connect(filter('highpass', 7000)).connect(env).connect(out);
+    src.start(t, Math.random() * 0.4);
+    src.stop(t + 0.08);
+  };
+
+  const bar = (t0, index) => {
+    const at = (beat) => t0 + beat * BEAT + (beat % 1 ? swing : 0) + nudge();
+    const fill = index % 4 === 3; // a small variation every 4th bar
+
+    // Kick: 1, the "and" of 2, and sometimes the "and" of 3.
+    kick(at(0));
+    kick(at(1.5), 0.7);
+    if (fill || Math.random() < 0.35) kick(at(2.5), 0.6);
+
+    // Snare: laid back on 2 and 4, with an occasional ghost note.
+    snare(at(1) + 0.015);
+    snare(at(3) + 0.015);
+    if (fill) snare(at(3.5), 0.3);
+
+    // Hats on every 8th, accenting the beat, dropping one now and then.
+    for (let i = 0; i < 8; i++) {
+      if (Math.random() < 0.08) continue;
+      hat(at(i / 2), i % 2 ? 0.05 : 0.09);
+    }
+  };
+
+  return { bar };
 }
 
 // ─── One-shots ───────────────────────────────────────────────────────

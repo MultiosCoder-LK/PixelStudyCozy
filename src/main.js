@@ -106,7 +106,7 @@ $('#use-location').addEventListener('click', () => {
 
 // ─── Sound ───────────────────────────────────────────────────────────
 
-const CHANNELS = ['rain', 'wind', 'fire', 'lofi'];
+const CHANNELS = ['rain', 'wind', 'fire', 'lofi', 'beats'];
 const slider = (name) => $(`#vol-${name}`);
 
 for (const name of ['master', ...CHANNELS]) slider(name).value = Math.round(DEFAULT_VOLUMES[name] * 100);

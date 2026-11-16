@@ -24,7 +24,7 @@ npm run dev     # then open http://localhost:5173
 | 🐱 Cat | Click for a sleepy "z" |
 | 🕰️ Clock | Shows the real time |
 | ☁️ Mood button | Override the weather or time of day |
-| 🎧 Sound button | Mixer for rain, wind, fireplace and lo-fi keys. Rain and wind follow the weather until you move those sliders. |
+| 🎧 Sound button | Mixer for rain, wind, fireplace, lo-fi keys and lo-fi beats (the beats stay in time with the keys). Rain and wind follow the weather until you move those sliders. |
 
 ## Make it yours
 
