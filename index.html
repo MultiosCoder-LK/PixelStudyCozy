@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pixel Study Cozy</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="description" content="A cozy pixel-art room with live weather and ambient sounds." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="game"></div>
+
+    <!-- Intro screen: the click here also unlocks audio in the browser. -->
+    <div id="intro">
+      <div class="intro-card">
+        <h1>Pixel Study Cozy</h1>
+        <p>A little room with real weather outside the window.</p>
+        <button id="enter" class="btn btn-big">🕯️ Turn on the lamp</button>
+        <p class="hint">Click things in the room. 🎧 Headphones recommended.</p>
+      </div>
+    </div>
+
+    <div id="status"></div>
+
+    <div id="toolbar">
+      <button class="btn" data-toggle="mood">☁️ Mood</button>
+      <button class="btn" data-toggle="sound">🎧 Sound</button>
+    </div>
+
+    <!-- Mood: weather + time of day -->
+    <section id="panel-mood" class="panel popover">
+      <header><h2>Mood</h2><button class="close" data-close aria-label="Close">✕</button></header>
+      <label>Weather
+        <select id="weather-mode">
+          <option value="live">🌍 Live weather</option>
+          <option value="clear">☀️ Clear</option>
+          <option value="cloudy">☁️ Cloudy</option>
+          <option value="rain">🌧️ Rain</option>
+          <option value="storm">⛈️ Thunderstorm</option>
+          <option value="snow">❄️ Snow</option>
+          <option value="fog">🌫️ Fog</option>
+        </select>
+      </label>
+      <label>Time of day
+        <select id="time-mode">
+          <option value="live">🕰️ Real time</option>
+          <option value="dawn">🌅 Dawn</option>
+          <option value="day">🌞 Day</option>
+          <option value="dusk">🌇 Dusk</option>
+          <option value="night">🌙 Night</option>
+        </select>
+      </label>
+      <button id="use-location" class="btn">📍 Use my location</button>
+      <p id="location-note" class="note"></p>
+    </section>
+
+    <!-- Sound mixer -->
+    <section id="panel-sound" class="panel popover">
+      <header><h2>Sound</h2><button class="close" data-close aria-label="Close">✕</button></header>
+      <label class="slider">🔊 Master <input type="range" id="vol-master" min="0" max="100" /></label>
+      <label class="slider">🌧️ Rain <input type="range" id="vol-rain" min="0" max="100" /></label>
+      <label class="slider">🌬️ Wind <input type="range" id="vol-wind" min="0" max="100" /></label>
+      <label class="slider">🔥 Fireplace <input type="range" id="vol-fire" min="0" max="100" /></label>
+      <label class="slider">🎹 Lo-fi keys <input type="range" id="vol-lofi" min="0" max="100" /></label>
+      <label class="check"><input type="checkbox" id="match-weather" checked /> Rain &amp; wind match the weather</label>
+    </section>
+
+    <!-- Content panels opened by clicking objects in the room.
+         ✏️ Replace the placeholder text with your own. -->
+    <section id="panel-about" class="panel content">
+      <header><h2>📓 About me</h2><button class="close" data-close aria-label="Close">✕</button></header>
+      <p><strong>Hi, I'm Your Name.</strong></p>
+      <p>A short intro goes here: what you do, what you're learning, and what you care about.</p>
+      <p>Mention where you're based, your school or job, and one fun fact. The cat gets a mention too.</p>
+    </section>
+
+    <section id="panel-projects" class="panel content">
+      <header><h2>🖥️ Projects</h2><button class="close" data-close aria-label="Close">✕</button></header>
+      <article class="card">
+        <h3>Pixel Study Cozy</h3>
+        <p>This website: a pixel room with live weather and generated ambient sound.</p>
+        <p class="tags">Phaser 3 · Vite · Web Audio · Open-Meteo</p>
+      </article>
+      <article class="card">
+        <h3>Project two</h3>
+        <p>One or two sentences on what it does and what you learned.</p>
+        <p class="tags">Tools · you · used</p>
+      </article>
+      <article class="card">
+        <h3>Market trends (coming soon)</h3>
+        <p>A daily stock-trend dashboard. That little chart on the monitor is a teaser.</p>
+        <p class="tags">Python · yfinance · Charts</p>
+      </article>
+    </section>
+
+    <section id="panel-contact" class="panel content">
+      <header><h2>📌 Contact</h2><button class="close" data-close aria-label="Close">✕</button></header>
+      <p>Want to say hi? Pin a note on the board:</p>
+      <ul class="links">
+        <li><a href="#" target="_blank" rel="noopener">✉️ Email</a></li>
+        <li><a href="#" target="_blank" rel="noopener">💼 LinkedIn</a></li>
+        <li><a href="#" target="_blank" rel="noopener">🐙 GitHub</a></li>
+      </ul>
+    </section>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
