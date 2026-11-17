@@ -238,3 +238,27 @@ body {
 a {
   color: var(--accent);
 }
+
+/* ── Hover label over room objects ── */
+.room-label {
+  position: fixed;
+  z-index: 5;
+  transform: translate(-50%, -100%);
+  pointer-events: none;
+  white-space: nowrap;
+  font-family: var(--font);
+  font-size: clamp(16px, 1.6vw, 22px);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: #fff7e0;
+  background: #1a1426;
+  padding: 5px 10px;
+  box-shadow:
+    0 0 0 2px var(--accent),
+    0 4px 0 2px #0b0d18;
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+.room-label.show {
+  opacity: 1;
+}

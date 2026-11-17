@@ -328,34 +328,40 @@ export class RoomScene extends Phaser.Scene {
     const baseY = obj.y;
     obj.on('pointerover', () => {
       this.tweens.add({ targets: obj, y: baseY - 1, duration: 80 });
-      const b = obj.getBounds();
-      this.label
-        .setText(label)
-        .setPosition(Phaser.Math.Clamp(b.centerX, 24, W - 24), b.top - 2)
-        .setVisible(true);
+      this.showLabel(label, obj.getBounds());
     });
     obj.on('pointerout', () => {
       this.tweens.add({ targets: obj, y: baseY, duration: 80 });
-      this.label.setVisible(false);
+      this.hideLabel();
     });
     obj.on('pointerdown', () => {
-      this.label.setVisible(false);
+      this.hideLabel();
       onClick();
     });
   }
 
+  // The hover label is an HTML element over the canvas, so it stays sharp
+  // instead of being drawn at 8px and stretched with the pixel art.
   createLabel() {
-    this.label = this.add
-      .text(0, 0, '', {
-        fontFamily: '"Pixelify Sans", monospace',
-        fontSize: '8px',
-        color: '#fff7e0',
-        backgroundColor: '#1a1426',
-        padding: { x: 3, y: 1 },
-      })
-      .setOrigin(0.5, 1)
-      .setDepth(100)
-      .setVisible(false);
+    this.label = document.createElement('div');
+    this.label.className = 'room-label';
+    document.body.appendChild(this.label);
+    this.events.once('shutdown', () => this.label.remove());
+  }
+
+  showLabel(text, bounds) {
+    const rect = this.game.canvas.getBoundingClientRect();
+    const scale = rect.width / W;
+    this.label.textContent = text;
+    const half = this.label.offsetWidth / 2 + 6;
+    const x = Phaser.Math.Clamp(rect.left + bounds.centerX * scale, half, window.innerWidth - half);
+    this.label.style.left = `${x}px`;
+    this.label.style.top = `${rect.top + bounds.top * scale - 6}px`;
+    this.label.classList.add('show');
+  }
+
+  hideLabel() {
+    this.label.classList.remove('show');
   }
 
   catZzz() {
