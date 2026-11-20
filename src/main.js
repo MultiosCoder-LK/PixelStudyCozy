@@ -4,7 +4,7 @@ import { RoomScene } from './scenes/RoomScene.js';
 import { state, on, emit } from './state.js';
 import * as audio from './audio.js';
 import { fetchWeather, phaseForHour, KIND_LABEL } from './weather.js';
-import { DEFAULT_LOCATION, DEFAULT_VOLUMES, WEATHER_REFRESH_MINUTES } from './config.js';
+import { CHARACTER, DEFAULT_LOCATION, DEFAULT_VOLUMES, WEATHER_REFRESH_MINUTES } from './config.js';
 
 const $ = (selector) => document.querySelector(selector);
 
@@ -140,6 +140,27 @@ $('#enter').addEventListener('click', () => {
   audio.start();
   $('#intro').classList.add('hidden');
 });
+
+// ─── Character ───────────────────────────────────────────────────────
+
+const savedCharacter = localStorage.getItem('psc-character');
+state.character = savedCharacter in CHARACTER.files ? savedCharacter : CHARACTER.default;
+
+function markSelectedCharacter() {
+  document.querySelectorAll('[data-character]').forEach((btn) =>
+    btn.classList.toggle('selected', btn.dataset.character === state.character),
+  );
+}
+markSelectedCharacter();
+
+document.querySelectorAll('[data-character]').forEach((btn) =>
+  btn.addEventListener('click', () => {
+    state.character = btn.dataset.character;
+    localStorage.setItem('psc-character', state.character);
+    markSelectedCharacter();
+    emit('character', state.character);
+  }),
+);
 
 // ─── Panels ──────────────────────────────────────────────────────────
 

@@ -262,3 +262,37 @@ a {
 .room-label.show {
   opacity: 1;
 }
+
+/* ── Character picker ── */
+.char-choices {
+  display: flex;
+  gap: 12px;
+}
+.char-choice {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 0 8px;
+  font-family: var(--font);
+  font-size: 15px;
+  color: var(--text);
+  background: #2c2346;
+  border: 3px solid #2c2346;
+  cursor: pointer;
+}
+.char-choice:hover {
+  filter: brightness(1.15);
+}
+.char-choice.selected {
+  border-color: var(--accent);
+}
+.char-preview {
+  width: 64px;
+  height: 64px;
+  /* show only the first 32×32 frame of the 4-frame sheet, at 2× */
+  background-size: 400% 100%;
+  background-position: 0 0;
+  image-rendering: pixelated;
+}

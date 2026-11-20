@@ -28,6 +28,7 @@
     <div id="toolbar">
       <button class="btn" data-toggle="mood">☁️ Mood</button>
       <button class="btn" data-toggle="sound">🎧 Sound</button>
+      <button class="btn" data-toggle="character">🧑 Character</button>
     </div>
 
     <!-- Mood: weather + time of day -->
@@ -67,6 +68,19 @@
       <label class="slider">🎹 Lo-fi keys <input type="range" id="vol-lofi" min="0" max="100" /></label>
       <label class="slider">🥁 Lo-fi beats <input type="range" id="vol-beats" min="0" max="100" /></label>
       <label class="check"><input type="checkbox" id="match-weather" checked /> Rain &amp; wind match the weather</label>
+    </section>
+
+    <!-- Character picker -->
+    <section id="panel-character" class="panel popover">
+      <header><h2>Character</h2><button class="close" data-close aria-label="Close">✕</button></header>
+      <div class="char-choices">
+        <button class="char-choice" data-character="female">
+          <span class="char-preview" style="background-image: url(art/character-female.png)"></span>Female
+        </button>
+        <button class="char-choice" data-character="male">
+          <span class="char-preview" style="background-image: url(art/character-male.png)"></span>Male
+        </button>
+      </div>
     </section>
 
     <!-- Content panels opened by clicking objects in the room.

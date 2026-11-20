@@ -12,3 +12,21 @@ export const DEFAULT_VOLUMES = { master: 0.8, rain: 0, wind: 0, fire: 0.25, lofi
 
 // The cat's name (shown when you hover over it).
 export const CAT_NAME = 'Mochi';
+
+// Your character. Draw it in Piskel (piskelapp.com) and export PNG
+// spritesheets to public/art/. All frames sit side by side in one row
+// and play in order as an idle loop. Visitors pick one with the
+// Character button; their choice is remembered.
+export const CHARACTER = {
+  name: 'Me',              // shown when you hover over the character
+  files: {
+    female: 'art/character-female.png',
+    male: 'art/character-male.png',
+  },
+  default: 'female',       // shown until a visitor picks one
+  frameWidth: 32,
+  frameHeight: 32,
+  frameRate: 3,            // idle animation speed, frames per second
+  x: 126,                  // where the character stands (bottom-center of the sprite)
+  y: 166,
+};

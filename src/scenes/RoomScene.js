@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { buildTextures, PALETTE } from '../art.js';
 import { state, on, emit } from '../state.js';
-import { CAT_NAME } from '../config.js';
+import { CAT_NAME, CHARACTER } from '../config.js';
 
 // The game is drawn at 320×180 and scaled up, so every unit is one pixel.
 const W = 320;
@@ -36,6 +36,15 @@ const lerpColor = (a, b, t) => {
 export class RoomScene extends Phaser.Scene {
   constructor() {
     super('room');
+  }
+
+  preload() {
+    for (const [kind, file] of Object.entries(CHARACTER.files)) {
+      this.load.spritesheet(`character-${kind}`, file, {
+        frameWidth: CHARACTER.frameWidth,
+        frameHeight: CHARACTER.frameHeight,
+      });
+    }
   }
 
   create() {
@@ -284,6 +293,35 @@ export class RoomScene extends Phaser.Scene {
     this.makeClickable(this.cork, 'Contact', () => emit('open-panel', 'contact'));
     this.makeClickable(this.lamp, 'Lamp', () => this.toggleLamp());
     this.makeClickable(this.cat, CAT_NAME, () => this.catZzz());
+
+    this.createCharacter();
+  }
+
+  createCharacter() {
+    // One idle animation per spritesheet that loaded (missing files are skipped).
+    const kinds = Object.keys(CHARACTER.files).filter((kind) => this.textures.exists(`character-${kind}`));
+    if (!kinds.length) return;
+    for (const kind of kinds) {
+      this.anims.create({
+        key: `character-${kind}-idle`,
+        frames: this.anims.generateFrameNumbers(`character-${kind}`),
+        frameRate: CHARACTER.frameRate,
+        repeat: -1,
+      });
+    }
+    const show = (kind) => {
+      if (kinds.includes(kind)) this.character.play(`character-${kind}-idle`);
+    };
+
+    this.character = this.add.sprite(CHARACTER.x, CHARACTER.y, `character-${kinds[0]}`)
+      .setOrigin(0.5, 1).setDepth(23);
+    show(state.character);
+    if (!this.character.anims.isPlaying) this.character.play(`character-${kinds[0]}-idle`);
+    on('character', show);
+
+    this.makeClickable(this.character, CHARACTER.name, () => {
+      this.tweens.add({ targets: this.character, y: CHARACTER.y - 4, duration: 120, yoyo: true, ease: 'Quad.out' });
+    });
   }
 
   drawChart() {

@@ -8,6 +8,7 @@ export const state = {
   phase: 'day', // dawn | day | dusk | night
   timeMode: 'live', // 'live' or a fixed phase
   lamp: true,
+  character: null, // key of CHARACTER.files, e.g. 'female' or 'male'
 };
 
 const listeners = {};
